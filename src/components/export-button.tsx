@@ -4,14 +4,23 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Download, Loader2 } from "lucide-react";
 import { exportToPdf } from "@/lib/export-pdf";
+import { ElternInfobogen } from "@/lib/types";
 
 interface ExportButtonProps {
   allChecked: boolean;
   isAnyEditing: boolean;
   filename: string;
+  report: ElternInfobogen;
+  anmerkungen: string;
 }
 
-export function ExportButton({ allChecked, isAnyEditing, filename }: ExportButtonProps) {
+export function ExportButton({
+  allChecked,
+  isAnyEditing,
+  filename,
+  report,
+  anmerkungen,
+}: ExportButtonProps) {
   const [isExporting, setIsExporting] = useState(false);
 
   const disabled = !allChecked || isAnyEditing || isExporting;
@@ -19,7 +28,7 @@ export function ExportButton({ allChecked, isAnyEditing, filename }: ExportButto
   const handleExport = async () => {
     setIsExporting(true);
     try {
-      await exportToPdf("elternbrief", filename);
+      await exportToPdf(report, anmerkungen, filename);
     } catch (err) {
       console.error("PDF export error:", err);
       alert("PDF-Export fehlgeschlagen. Verwenden Sie Strg+P / Cmd+P als Alternative.");

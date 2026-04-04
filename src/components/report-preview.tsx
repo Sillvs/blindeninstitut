@@ -133,80 +133,67 @@ export function ReportPreview({
         </span>
       </div>
 
-      {/* Page 1: Sensorik */}
-      <div data-pdf-section>
-        <ReportSection
-          title="Sensorik"
-          icon={<Eye className="h-5 w-5 text-[#005ca9]" />}
-          color="bg-blue-50"
-          findings={report.sensorik.findings}
-          checked={sectionChecks.sensorik}
-          onCheckedChange={(c) => onSectionCheckChange("sensorik", c)}
-          onToggleHidden={(i) => toggleHidden("sensorik", i)}
-          onSaveFinding={(i, u) => saveFinding("sensorik", i, u)}
-          onEditingChange={onEditingChange}
+      {/* Sensorik */}
+      <ReportSection
+        title="Sensorik"
+        icon={<Eye className="h-5 w-5 text-[#005ca9]" />}
+        color="bg-blue-50"
+        findings={report.sensorik.findings}
+        checked={sectionChecks.sensorik}
+        onCheckedChange={(c) => onSectionCheckChange("sensorik", c)}
+        onToggleHidden={(i) => toggleHidden("sensorik", i)}
+        onSaveFinding={(i, u) => saveFinding("sensorik", i, u)}
+        onEditingChange={onEditingChange}
+      />
+
+      {/* Motorik */}
+      <ReportSection
+        title="Motorik"
+        icon={<Move className="h-5 w-5 text-purple-600" />}
+        color="bg-purple-50"
+        findings={report.motorik.findings}
+        checked={sectionChecks.motorik}
+        onCheckedChange={(c) => onSectionCheckChange("motorik", c)}
+        onToggleHidden={(i) => toggleHidden("motorik", i)}
+        onSaveFinding={(i, u) => saveFinding("motorik", i, u)}
+        onEditingChange={onEditingChange}
+      />
+
+      {/* Kognition + Anmerkungen */}
+      <ReportSection
+        title="Kognition & Entwicklung"
+        icon={<Brain className="h-5 w-5 text-emerald-600" />}
+        color="bg-emerald-50"
+        findings={report.kognition.findings}
+        checked={sectionChecks.kognition}
+        onCheckedChange={(c) => onSectionCheckChange("kognition", c)}
+        onToggleHidden={(i) => toggleHidden("kognition", i)}
+        onSaveFinding={(i, u) => saveFinding("kognition", i, u)}
+        onEditingChange={onEditingChange}
+      />
+
+      {/* Hidden findings note */}
+      {hasHiddenFindings && (
+        <p className="mt-4 text-sm italic text-gray-500">
+          Weitere Befunde wurden im persönlichen Gespräch besprochen.
+        </p>
+      )}
+
+      {/* Anmerkungen */}
+      <div className="rounded-xl border bg-white p-6">
+        <h3 className="mb-2 text-sm font-semibold text-gray-900">
+          Anmerkungen der Frühförderin
+        </h3>
+        <p className="mb-2 text-xs text-gray-500">
+          Optionale persönliche Ergänzungen, die im PDF erscheinen.
+        </p>
+        <textarea
+          value={anmerkungen}
+          onChange={(e) => onAnmerkungenChange(e.target.value)}
+          placeholder="z.B. 'Mathilda zeigt im Alltag besonders bei Wimmelbüchern Vermeidungsverhalten. Wir empfehlen...'"
+          className="w-full rounded-lg border border-gray-200 p-3 text-sm focus:border-[#005ca9] focus:outline-none focus:ring-1 focus:ring-[#005ca9]"
+          rows={3}
         />
-      </div>
-
-      {/* Page 2: Motorik */}
-      <div data-pdf-section>
-        <ReportSection
-          title="Motorik"
-          icon={<Move className="h-5 w-5 text-purple-600" />}
-          color="bg-purple-50"
-          findings={report.motorik.findings}
-          checked={sectionChecks.motorik}
-          onCheckedChange={(c) => onSectionCheckChange("motorik", c)}
-          onToggleHidden={(i) => toggleHidden("motorik", i)}
-          onSaveFinding={(i, u) => saveFinding("motorik", i, u)}
-          onEditingChange={onEditingChange}
-        />
-      </div>
-
-      {/* Page 3: Kognition + Anmerkungen */}
-      <div data-pdf-section>
-        <ReportSection
-          title="Kognition & Entwicklung"
-          icon={<Brain className="h-5 w-5 text-emerald-600" />}
-          color="bg-emerald-50"
-          findings={report.kognition.findings}
-          checked={sectionChecks.kognition}
-          onCheckedChange={(c) => onSectionCheckChange("kognition", c)}
-          onToggleHidden={(i) => toggleHidden("kognition", i)}
-          onSaveFinding={(i, u) => saveFinding("kognition", i, u)}
-          onEditingChange={onEditingChange}
-        />
-
-        {/* Hidden findings note for print */}
-        {hasHiddenFindings && (
-          <p className="mt-4 text-sm italic text-gray-500">
-            Weitere Befunde wurden im persönlichen Gespräch besprochen.
-          </p>
-        )}
-
-        {/* Anmerkungen */}
-        <div className="mt-6 rounded-xl border bg-white p-6">
-          <h3 className="mb-2 text-sm font-semibold text-gray-900">
-            Anmerkungen der Frühförderin
-          </h3>
-          <p className="mb-2 text-xs text-gray-500" data-export-hide>
-            Optionale persönliche Ergänzungen, die im PDF erscheinen.
-          </p>
-          <textarea
-            value={anmerkungen}
-            onChange={(e) => onAnmerkungenChange(e.target.value)}
-            placeholder="z.B. 'Mathilda zeigt im Alltag besonders bei Wimmelbüchern Vermeidungsverhalten. Wir empfehlen...'"
-            className="w-full rounded-lg border border-gray-200 p-3 text-sm focus:border-[#005ca9] focus:outline-none focus:ring-1 focus:ring-[#005ca9]"
-            rows={3}
-          />
-        </div>
-      </div>
-
-      {/* PDF footer (rendered on last page by export-pdf) */}
-      <div className="text-center text-xs text-gray-400 pt-4" data-pdf-footer style={{ display: "none" }}>
-        <Separator className="mb-3" />
-        Erstellt mit Blindi | Blindeninstitutsstiftung |{" "}
-        {new Date().toLocaleDateString("de-DE")}
       </div>
     </div>
   );

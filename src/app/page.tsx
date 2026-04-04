@@ -386,6 +386,8 @@ export default function Home() {
                 allChecked={allChecked}
                 isAnyEditing={isAnyEditing}
                 filename={exportFilename}
+                report={report}
+                anmerkungen={anmerkungen}
               />
             </div>
 
