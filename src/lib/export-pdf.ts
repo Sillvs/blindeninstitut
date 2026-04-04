@@ -7,9 +7,19 @@ import { ElternInfobogen } from "@/lib/types";
 
 const A4_WIDTH_MM = 210;
 const A4_HEIGHT_MM = 297;
-const MARGIN_MM = 0; // PdfLayout handles its own padding
+const PAGE_MARGIN_MM = 8;
 const A4_WIDTH_PX = 794; // 210mm at 96dpi
+const SCALE = 2;
 
+/**
+ * Block-aware PDF export.
+ *
+ * 1. Renders PdfLayout off-screen
+ * 2. Captures the full layout as one big canvas
+ * 3. Reads `data-pdf-block` element positions to find safe cut points
+ * 4. Slices the canvas BETWEEN blocks — never through a block
+ * 5. Places each slice on its own PDF page
+ */
 export async function exportToPdf(
   report: ElternInfobogen,
   anmerkungen: string,
@@ -29,104 +39,120 @@ export async function exportToPdf(
 
   // 2. Render PdfLayout into container
   const root = createRoot(container);
-  root.render(
-    createElement(PdfLayout, { report, anmerkungen })
-  );
+  root.render(createElement(PdfLayout, { report, anmerkungen }));
 
   // 3. Wait for render + images to load
   await new Promise((resolve) => setTimeout(resolve, 500));
-
-  // Wait for all images
   const images = container.querySelectorAll("img");
   await Promise.all(
     Array.from(images).map(
       (img) =>
         new Promise<void>((resolve) => {
-          if (img.complete) {
-            resolve();
-          } else {
+          if (img.complete) resolve();
+          else {
             img.onload = () => resolve();
-            img.onerror = () => resolve(); // Continue even if image fails
+            img.onerror = () => resolve();
           }
         })
     )
   );
 
   try {
-    // 4. Capture with html2canvas
-    const canvas = await html2canvas(container, {
-      scale: 2,
+    // 4. Collect block boundaries (px positions relative to container top)
+    const blocks = container.querySelectorAll("[data-pdf-block]");
+    const containerTop = container.getBoundingClientRect().top;
+    const breakPoints: number[] = [0]; // always start at 0
+
+    blocks.forEach((block) => {
+      const rect = (block as HTMLElement).getBoundingClientRect();
+      const top = rect.top - containerTop;
+      breakPoints.push(top);
+    });
+
+    // Add the full container height as the final boundary
+    const totalHeight = container.scrollHeight;
+    breakPoints.push(totalHeight);
+
+    // Deduplicate and sort
+    const uniqueBreaks = [...new Set(breakPoints)].sort((a, b) => a - b);
+
+    // 5. Capture the entire container as one big canvas
+    const fullCanvas = await html2canvas(container, {
+      scale: SCALE,
       useCORS: true,
       logging: false,
       width: A4_WIDTH_PX,
       windowWidth: A4_WIDTH_PX,
     });
 
-    // 5. Create PDF and paginate
-    const pdf = new jsPDF("portrait", "mm", "a4");
-    const contentWidth = A4_WIDTH_MM - MARGIN_MM * 2;
-    const imgHeight = (canvas.height * contentWidth) / canvas.width;
-    const pageHeight = A4_HEIGHT_MM;
-    const usableHeight = pageHeight - MARGIN_MM * 2;
+    // 6. Calculate page capacity in CSS pixels
+    const contentWidthMM = A4_WIDTH_MM - PAGE_MARGIN_MM * 2;
+    const contentHeightMM = A4_HEIGHT_MM - PAGE_MARGIN_MM * 2;
+    // How many CSS pixels fit in the content area of one page?
+    const pxPerMM = A4_WIDTH_PX / A4_WIDTH_MM;
+    const pageCapacityPx = contentHeightMM * pxPerMM;
 
-    const imgData = canvas.toDataURL("image/jpeg", 0.95);
+    // 7. Group blocks into pages — greedy bin packing
+    // Each page is defined by [startPx, endPx) in the original layout
+    const pages: Array<{ start: number; end: number }> = [];
+    let pageStart = 0;
 
-    if (imgHeight <= usableHeight) {
-      // Fits on one page
-      pdf.addImage(imgData, "JPEG", MARGIN_MM, MARGIN_MM, contentWidth, imgHeight);
-    } else {
-      // Multiple pages — slice the canvas
-      const pxPerPage = (usableHeight / imgHeight) * canvas.height;
-      let pageIndex = 0;
-      let yOffset = 0;
+    for (let i = 1; i < uniqueBreaks.length; i++) {
+      const blockEnd = uniqueBreaks[i];
+      const pageHeight = blockEnd - pageStart;
 
-      while (yOffset < canvas.height) {
-        if (pageIndex > 0) pdf.addPage();
-
-        const sliceHeight = Math.min(pxPerPage, canvas.height - yOffset);
-        const pageCanvas = document.createElement("canvas");
-        pageCanvas.width = canvas.width;
-        pageCanvas.height = sliceHeight;
-
-        const ctx = pageCanvas.getContext("2d");
-        if (ctx) {
-          ctx.fillStyle = "white";
-          ctx.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
-          ctx.drawImage(
-            canvas,
-            0,
-            yOffset,
-            canvas.width,
-            sliceHeight,
-            0,
-            0,
-            canvas.width,
-            sliceHeight
-          );
-        }
-
-        const pageImgData = pageCanvas.toDataURL("image/jpeg", 0.95);
-        const pageImgHeight = (sliceHeight * contentWidth) / canvas.width;
-        pdf.addImage(pageImgData, "JPEG", MARGIN_MM, MARGIN_MM, contentWidth, pageImgHeight);
-
-        // Add page number
-        pdf.setFontSize(8);
-        pdf.setTextColor(150, 150, 150);
-        pdf.text(
-          `Seite ${pageIndex + 1}`,
-          A4_WIDTH_MM / 2,
-          A4_HEIGHT_MM - 5,
-          { align: "center" }
-        );
-
-        yOffset += pxPerPage;
-        pageIndex++;
+      if (pageHeight > pageCapacityPx && i > 1 && uniqueBreaks[i - 1] > pageStart) {
+        // This block would overflow — start a new page at the previous break point
+        pages.push({ start: pageStart, end: uniqueBreaks[i - 1] });
+        pageStart = uniqueBreaks[i - 1];
       }
+    }
+    // Push the last page
+    if (pageStart < totalHeight) {
+      pages.push({ start: pageStart, end: totalHeight });
+    }
+
+    // 8. Create PDF and render each page
+    const pdf = new jsPDF("portrait", "mm", "a4");
+
+    for (let p = 0; p < pages.length; p++) {
+      if (p > 0) pdf.addPage();
+
+      const { start, end } = pages[p];
+      const sliceHeightPx = end - start;
+
+      // Canvas pixels (scaled)
+      const srcY = Math.round(start * SCALE);
+      const srcH = Math.round(sliceHeightPx * SCALE);
+      const srcW = fullCanvas.width;
+
+      // Create a slice canvas
+      const pageCanvas = document.createElement("canvas");
+      pageCanvas.width = srcW;
+      pageCanvas.height = srcH;
+
+      const ctx = pageCanvas.getContext("2d");
+      if (ctx) {
+        ctx.fillStyle = "white";
+        ctx.fillRect(0, 0, srcW, srcH);
+        ctx.drawImage(fullCanvas, 0, srcY, srcW, srcH, 0, 0, srcW, srcH);
+      }
+
+      // Convert to image and place on PDF
+      const imgData = pageCanvas.toDataURL("image/jpeg", 0.95);
+      const imgWidthMM = contentWidthMM;
+      const imgHeightMM = (sliceHeightPx / A4_WIDTH_PX) * A4_WIDTH_MM;
+
+      pdf.addImage(imgData, "JPEG", PAGE_MARGIN_MM, PAGE_MARGIN_MM, imgWidthMM, imgHeightMM);
+
+      // Page number
+      pdf.setFontSize(8);
+      pdf.setTextColor(160, 160, 160);
+      pdf.text(`Seite ${p + 1}`, A4_WIDTH_MM / 2, A4_HEIGHT_MM - 5, { align: "center" });
     }
 
     pdf.save(filename);
   } finally {
-    // 6. Clean up
     root.unmount();
     document.body.removeChild(container);
   }

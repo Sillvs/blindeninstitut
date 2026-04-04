@@ -36,16 +36,14 @@ const COLORS = {
 function FindingCardPdf({
   finding,
   accentColor,
-  bgColor,
 }: {
   finding: Finding;
   accentColor: string;
-  bgColor: string;
 }) {
   return (
     <div
+      data-pdf-block
       style={{
-        borderLeft: `4px solid ${accentColor}`,
         borderRadius: "8px",
         backgroundColor: COLORS.white,
         marginBottom: "10px",
@@ -64,14 +62,7 @@ function FindingCardPdf({
           gap: "8px",
         }}
       >
-        <span
-          style={{
-            fontSize: "14px",
-            lineHeight: "1",
-            marginTop: "2px",
-            flexShrink: 0,
-          }}
-        >
+        <span style={{ fontSize: "14px", lineHeight: "1", marginTop: "2px", flexShrink: 0 }}>
           👁
         </span>
         <div>
@@ -87,13 +78,7 @@ function FindingCardPdf({
           >
             Beobachtung
           </div>
-          <div
-            style={{
-              fontSize: "11px",
-              color: COLORS.gray800,
-              lineHeight: "1.5",
-            }}
-          >
+          <div style={{ fontSize: "11px", color: COLORS.gray800, lineHeight: "1.5" }}>
             {finding.beobachtung}
           </div>
         </div>
@@ -109,14 +94,7 @@ function FindingCardPdf({
           backgroundColor: COLORS.amberBg,
         }}
       >
-        <span
-          style={{
-            fontSize: "14px",
-            lineHeight: "1",
-            marginTop: "2px",
-            flexShrink: 0,
-          }}
-        >
+        <span style={{ fontSize: "14px", lineHeight: "1", marginTop: "2px", flexShrink: 0 }}>
           💡
         </span>
         <div>
@@ -132,13 +110,7 @@ function FindingCardPdf({
           >
             Was bedeutet das?
           </div>
-          <div
-            style={{
-              fontSize: "11px",
-              color: COLORS.gray800,
-              lineHeight: "1.5",
-            }}
-          >
+          <div style={{ fontSize: "11px", color: COLORS.gray800, lineHeight: "1.5" }}>
             {finding.bedeutung}
           </div>
         </div>
@@ -154,14 +126,7 @@ function FindingCardPdf({
           backgroundColor: COLORS.greenBg,
         }}
       >
-        <span
-          style={{
-            fontSize: "14px",
-            lineHeight: "1",
-            marginTop: "2px",
-            flexShrink: 0,
-          }}
-        >
+        <span style={{ fontSize: "14px", lineHeight: "1", marginTop: "2px", flexShrink: 0 }}>
           💚
         </span>
         <div>
@@ -177,13 +142,7 @@ function FindingCardPdf({
           >
             Was Sie tun können
           </div>
-          <div
-            style={{
-              fontSize: "11px",
-              color: COLORS.gray800,
-              lineHeight: "1.5",
-            }}
-          >
+          <div style={{ fontSize: "11px", color: COLORS.gray800, lineHeight: "1.5" }}>
             {finding.empfehlung}
           </div>
         </div>
@@ -195,16 +154,15 @@ function FindingCardPdf({
 function SectionHeader({
   title,
   emoji,
-  color,
   bgColor,
 }: {
   title: string;
   emoji: string;
-  color: string;
   bgColor: string;
 }) {
   return (
     <div
+      data-pdf-block
       style={{
         display: "flex",
         alignItems: "center",
@@ -227,24 +185,10 @@ function SectionHeader({
       >
         {emoji}
       </div>
-      <h2
-        style={{
-          fontSize: "16px",
-          fontWeight: 700,
-          color: COLORS.gray900,
-          margin: 0,
-        }}
-      >
+      <h2 style={{ fontSize: "16px", fontWeight: 700, color: COLORS.gray900, margin: 0 }}>
         {title}
       </h2>
-      <div
-        style={{
-          flex: 1,
-          height: "2px",
-          backgroundColor: bgColor,
-          borderRadius: "1px",
-        }}
-      />
+      <div style={{ flex: 1, height: "2px", backgroundColor: bgColor, borderRadius: "1px" }} />
     </div>
   );
 }
@@ -267,19 +211,13 @@ export function PdfLayout({ report, anmerkungen }: PdfLayoutProps) {
         color: COLORS.gray800,
         backgroundColor: COLORS.white,
         lineHeight: "1.5",
+        padding: "0 40px",
       }}
     >
       {/* ===== HEADER / COVER ===== */}
-      <div style={{ padding: "36px 40px 0 40px" }}>
+      <div data-pdf-block style={{ paddingTop: "36px" }}>
         {/* Logo + Institution */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "14px",
-            marginBottom: "8px",
-          }}
-        >
+        <div style={{ display: "flex", alignItems: "center", gap: "14px", marginBottom: "8px" }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/logo.jpg"
@@ -288,13 +226,7 @@ export function PdfLayout({ report, anmerkungen }: PdfLayoutProps) {
             crossOrigin="anonymous"
           />
           <div>
-            <div
-              style={{
-                fontSize: "13px",
-                fontWeight: 600,
-                color: COLORS.gray900,
-              }}
-            >
+            <div style={{ fontSize: "13px", fontWeight: 600, color: COLORS.gray900 }}>
               Blindeninstitutsstiftung
             </div>
             <div style={{ fontSize: "10px", color: COLORS.gray500 }}>
@@ -314,23 +246,10 @@ export function PdfLayout({ report, anmerkungen }: PdfLayoutProps) {
         />
 
         {/* Title */}
-        <h1
-          style={{
-            fontSize: "24px",
-            fontWeight: 700,
-            color: COLORS.brand,
-            margin: "0 0 4px 0",
-          }}
-        >
+        <h1 style={{ fontSize: "24px", fontWeight: 700, color: COLORS.brand, margin: "0 0 4px 0" }}>
           Infobogen für Eltern
         </h1>
-        <p
-          style={{
-            fontSize: "13px",
-            color: COLORS.gray500,
-            margin: "0 0 20px 0",
-          }}
-        >
+        <p style={{ fontSize: "13px", color: COLORS.gray500, margin: "0 0 20px 0" }}>
           Ergebnisse der orthoptischen Überprüfung — verständlich erklärt
         </p>
 
@@ -341,56 +260,31 @@ export function PdfLayout({ report, anmerkungen }: PdfLayoutProps) {
             border: `1px solid ${COLORS.gray200}`,
             borderRadius: "10px",
             padding: "16px 20px",
-            marginBottom: "8px",
           }}
         >
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              gap: "8px 24px",
-              fontSize: "12px",
-            }}
-          >
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px 24px", fontSize: "12px" }}>
             <div>
               <span style={{ color: COLORS.gray500 }}>Kind: </span>
-              <span style={{ fontWeight: 600, color: COLORS.gray900 }}>
-                {report.kindName}
-              </span>
+              <span style={{ fontWeight: 600, color: COLORS.gray900 }}>{report.kindName}</span>
             </div>
             <div>
               <span style={{ color: COLORS.gray500 }}>Geburtsdatum: </span>
-              <span style={{ fontWeight: 600, color: COLORS.gray900 }}>
-                {report.geburtsdatum}
-              </span>
+              <span style={{ fontWeight: 600, color: COLORS.gray900 }}>{report.geburtsdatum}</span>
             </div>
             <div>
               <span style={{ color: COLORS.gray500 }}>Untersuchung am: </span>
-              <span style={{ fontWeight: 600, color: COLORS.gray900 }}>
-                {report.untersuchungsdatum}
-              </span>
+              <span style={{ fontWeight: 600, color: COLORS.gray900 }}>{report.untersuchungsdatum}</span>
             </div>
             <div>
               <span style={{ color: COLORS.gray500 }}>Orthoptistin: </span>
-              <span style={{ fontWeight: 600, color: COLORS.gray900 }}>
-                {report.orthoptistin}
-              </span>
+              <span style={{ fontWeight: 600, color: COLORS.gray900 }}>{report.orthoptistin}</span>
             </div>
           </div>
 
           {report.diagnosen.length > 0 && (
             <div style={{ marginTop: "10px" }}>
-              <span style={{ fontSize: "11px", color: COLORS.gray500 }}>
-                Diagnosen:{" "}
-              </span>
-              <div
-                style={{
-                  display: "flex",
-                  flexWrap: "wrap" as const,
-                  gap: "4px",
-                  marginTop: "4px",
-                }}
-              >
+              <span style={{ fontSize: "11px", color: COLORS.gray500 }}>Diagnosen: </span>
+              <div style={{ display: "flex", flexWrap: "wrap" as const, gap: "4px", marginTop: "4px" }}>
                 {report.diagnosen.map((d, i) => (
                   <span
                     key={i}
@@ -412,308 +306,210 @@ export function PdfLayout({ report, anmerkungen }: PdfLayoutProps) {
         </div>
       </div>
 
+      {/* ===== INTRO: Liebe Eltern ===== */}
+      <div
+        data-pdf-block
+        style={{
+          marginTop: "20px",
+          backgroundColor: COLORS.sensorikBg,
+          border: `1px solid ${COLORS.brand}22`,
+          borderRadius: "10px",
+          padding: "16px 20px",
+        }}
+      >
+        <h3 style={{ fontSize: "13px", fontWeight: 700, color: COLORS.brand, margin: "0 0 6px 0" }}>
+          Liebe Eltern,
+        </h3>
+        <p style={{ fontSize: "11px", color: COLORS.gray700, lineHeight: "1.7", margin: "0 0 8px 0" }}>
+          dieser Infobogen fasst die Ergebnisse der orthoptischen Untersuchung Ihres Kindes
+          in verständlicher Sprache zusammen. Zu jedem Befund finden Sie:
+        </p>
+        <div style={{ fontSize: "11px", color: COLORS.gray700, lineHeight: "1.8", paddingLeft: "8px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+            <span style={{ fontSize: "13px" }}>👁</span>
+            <span><strong>Beobachtung</strong> — Was wurde bei der Untersuchung festgestellt?</span>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+            <span style={{ fontSize: "13px" }}>💡</span>
+            <span><strong>Was bedeutet das?</strong> — Wie wirkt sich das im Alltag Ihres Kindes aus?</span>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+            <span style={{ fontSize: "13px" }}>💚</span>
+            <span><strong>Was Sie tun können</strong> — Konkrete Tipps und Übungen für zu Hause</span>
+          </div>
+        </div>
+        <p style={{ fontSize: "10px", color: COLORS.gray500, lineHeight: "1.6", margin: "8px 0 0 0" }}>
+          Bei Fragen wenden Sie sich gerne an Ihre Frühförderin oder an uns (Kontaktdaten am Ende).
+        </p>
+      </div>
+
       {/* ===== SECTIONS ===== */}
-      <div style={{ padding: "0 40px" }}>
-        {/* Sensorik */}
-        {visibleSensorik.length > 0 && (
-          <div>
-            <SectionHeader
-              title="Sensorik"
-              emoji="👁"
-              color={COLORS.sensorik}
-              bgColor={COLORS.sensorikBg}
-            />
-            {visibleSensorik.map((f, i) => (
-              <FindingCardPdf
-                key={i}
-                finding={f}
-                accentColor={COLORS.sensorik}
-                bgColor={COLORS.sensorikBg}
-              />
-            ))}
-          </div>
-        )}
 
-        {/* Motorik */}
-        {visibleMotorik.length > 0 && (
-          <div>
-            <SectionHeader
-              title="Motorik"
-              emoji="🏃"
-              color={COLORS.motorik}
-              bgColor={COLORS.motorikBg}
-            />
-            {visibleMotorik.map((f, i) => (
-              <FindingCardPdf
-                key={i}
-                finding={f}
-                accentColor={COLORS.motorik}
-                bgColor={COLORS.motorikBg}
-              />
-            ))}
-          </div>
-        )}
+      {/* Sensorik */}
+      {visibleSensorik.length > 0 && (
+        <>
+          <SectionHeader title="Sensorik" emoji="👁" bgColor={COLORS.sensorikBg} />
+          {visibleSensorik.map((f, i) => (
+            <FindingCardPdf key={`s-${i}`} finding={f} accentColor={COLORS.sensorik} />
+          ))}
+        </>
+      )}
 
-        {/* Kognition */}
-        {visibleKognition.length > 0 && (
-          <div>
-            <SectionHeader
-              title="Kognition & Entwicklung"
-              emoji="🧠"
-              color={COLORS.kognition}
-              bgColor={COLORS.kognitionBg}
-            />
-            {visibleKognition.map((f, i) => (
-              <FindingCardPdf
-                key={i}
-                finding={f}
-                accentColor={COLORS.kognition}
-                bgColor={COLORS.kognitionBg}
-              />
-            ))}
-          </div>
-        )}
+      {/* Motorik */}
+      {visibleMotorik.length > 0 && (
+        <>
+          <SectionHeader title="Motorik" emoji="🏃" bgColor={COLORS.motorikBg} />
+          {visibleMotorik.map((f, i) => (
+            <FindingCardPdf key={`m-${i}`} finding={f} accentColor={COLORS.motorik} />
+          ))}
+        </>
+      )}
 
-        {/* Hidden findings note */}
-        {hasHidden && (
+      {/* Kognition */}
+      {visibleKognition.length > 0 && (
+        <>
+          <SectionHeader title="Kognition & Entwicklung" emoji="🧠" bgColor={COLORS.kognitionBg} />
+          {visibleKognition.map((f, i) => (
+            <FindingCardPdf key={`k-${i}`} finding={f} accentColor={COLORS.kognition} />
+          ))}
+        </>
+      )}
+
+      {/* Hidden findings note */}
+      {hasHidden && (
+        <p
+          data-pdf-block
+          style={{ fontSize: "11px", fontStyle: "italic", color: COLORS.gray500, marginTop: "16px" }}
+        >
+          Weitere Befunde wurden im persönlichen Gespräch besprochen.
+        </p>
+      )}
+
+      {/* Anmerkungen */}
+      {anmerkungen.trim() && (
+        <div
+          data-pdf-block
+          style={{
+            marginTop: "24px",
+            backgroundColor: COLORS.gray50,
+            border: `1px solid ${COLORS.gray200}`,
+            borderRadius: "10px",
+            padding: "16px 20px",
+          }}
+        >
+          <h3 style={{ fontSize: "13px", fontWeight: 600, color: COLORS.gray900, margin: "0 0 8px 0" }}>
+            Anmerkungen der Frühförderin
+          </h3>
           <p
             style={{
               fontSize: "11px",
-              fontStyle: "italic",
-              color: COLORS.gray500,
-              marginTop: "16px",
+              color: COLORS.gray700,
+              margin: 0,
+              lineHeight: "1.6",
+              whiteSpace: "pre-wrap" as const,
             }}
           >
-            Weitere Befunde wurden im persönlichen Gespräch besprochen.
+            {anmerkungen}
           </p>
-        )}
-
-        {/* Anmerkungen */}
-        {anmerkungen.trim() && (
-          <div
-            style={{
-              marginTop: "24px",
-              backgroundColor: COLORS.gray50,
-              border: `1px solid ${COLORS.gray200}`,
-              borderRadius: "10px",
-              padding: "16px 20px",
-            }}
-          >
-            <h3
-              style={{
-                fontSize: "13px",
-                fontWeight: 600,
-                color: COLORS.gray900,
-                margin: "0 0 8px 0",
-              }}
-            >
-              Anmerkungen der Frühförderin
-            </h3>
-            <p
-              style={{
-                fontSize: "11px",
-                color: COLORS.gray700,
-                margin: 0,
-                lineHeight: "1.6",
-                whiteSpace: "pre-wrap" as const,
-              }}
-            >
-              {anmerkungen}
-            </p>
-          </div>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* ===== INSTITUTIONAL INFO ===== */}
-      <div style={{ padding: "0 40px" }}>
-        <div
-          style={{
-            height: "2px",
-            backgroundColor: COLORS.gray200,
-            margin: "32px 0 24px 0",
-            borderRadius: "1px",
-          }}
-        />
+      <div
+        data-pdf-block
+        style={{
+          height: "2px",
+          backgroundColor: COLORS.gray200,
+          margin: "32px 0 0 0",
+          borderRadius: "1px",
+        }}
+      />
 
-        <h2
-          style={{
-            fontSize: "16px",
-            fontWeight: 700,
-            color: COLORS.brand,
-            margin: "0 0 10px 0",
-          }}
-        >
+      <div data-pdf-block style={{ marginTop: "24px" }}>
+        <h2 style={{ fontSize: "16px", fontWeight: 700, color: COLORS.brand, margin: "0 0 10px 0" }}>
           Über das Blindeninstitut
         </h2>
-
-        <p
-          style={{
-            fontSize: "11px",
-            color: COLORS.gray700,
-            lineHeight: "1.7",
-            margin: "0 0 20px 0",
-          }}
-        >
+        <p style={{ fontSize: "11px", color: COLORS.gray700, lineHeight: "1.7", margin: "0" }}>
           Die Blindeninstitutsstiftung begleitet seit über 170 Jahren blinde,
           sehbehinderte und taubblinde Menschen in verschiedenen Lebensphasen. Als
           Stiftung des öffentlichen Rechts sind wir an 7 Standorten in Bayern und
           Thüringen mit rund 2.500 Mitarbeitenden für Kinder, Jugendliche und
           Erwachsene da.
         </p>
+      </div>
 
-        {/* Frühförderung box */}
-        <div
-          style={{
-            backgroundColor: COLORS.sensorikBg,
-            border: `1px solid ${COLORS.brand}33`,
-            borderRadius: "10px",
-            padding: "16px 20px",
-            marginBottom: "20px",
-          }}
-        >
-          <h3
-            style={{
-              fontSize: "13px",
-              fontWeight: 700,
-              color: COLORS.brand,
-              margin: "0 0 8px 0",
-            }}
-          >
-            Frühförderung Sehen — Thüringen
-          </h3>
-          <p
-            style={{
-              fontSize: "11px",
-              color: COLORS.gray700,
-              lineHeight: "1.6",
-              margin: "0 0 12px 0",
-            }}
-          >
-            Unsere mobile Frühförderung unterstützt Ihr Kind direkt zu Hause
-            oder in der Kita — kostenlos und ohne Überweisung. Unser Team aus
-            Pädagoginnen und einer Orthoptistin berät Sie individuell.
-          </p>
+      {/* Frühförderung box */}
+      <div
+        data-pdf-block
+        style={{
+          marginTop: "16px",
+          backgroundColor: COLORS.sensorikBg,
+          border: `1px solid ${COLORS.brand}33`,
+          borderRadius: "10px",
+          padding: "16px 20px",
+        }}
+      >
+        <h3 style={{ fontSize: "13px", fontWeight: 700, color: COLORS.brand, margin: "0 0 8px 0" }}>
+          Frühförderung Sehen — Thüringen
+        </h3>
+        <p style={{ fontSize: "11px", color: COLORS.gray700, lineHeight: "1.6", margin: "0 0 12px 0" }}>
+          Unsere mobile Frühförderung unterstützt Ihr Kind direkt zu Hause
+          oder in der Kita — kostenlos und ohne Überweisung. Unser Team aus
+          Pädagoginnen und einer Orthoptistin berät Sie individuell.
+        </p>
 
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              gap: "8px",
-              fontSize: "11px",
-            }}
-          >
-            <div>
-              <div
-                style={{
-                  fontWeight: 600,
-                  color: COLORS.gray900,
-                  marginBottom: "2px",
-                }}
-              >
-                Standort Erfurt
-              </div>
-              <div style={{ color: COLORS.gray600 }}>
-                Tel: 0361 43068311
-              </div>
-              <div style={{ color: COLORS.gray600 }}>
-                Koenbergkstraße 3, 99084 Erfurt
-              </div>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", fontSize: "11px" }}>
+          <div>
+            <div style={{ fontWeight: 600, color: COLORS.gray900, marginBottom: "2px" }}>
+              Standort Erfurt
             </div>
-            <div>
-              <div
-                style={{
-                  fontWeight: 600,
-                  color: COLORS.gray900,
-                  marginBottom: "2px",
-                }}
-              >
-                Standort Schmalkalden
-              </div>
-              <div style={{ color: COLORS.gray600 }}>
-                Tel: 03683 643-0
-              </div>
-              <div style={{ color: COLORS.gray600 }}>
-                Notstraße 11, 98574 Schmalkalden
-              </div>
-            </div>
+            <div style={{ color: COLORS.gray600 }}>Tel: 0361 43068311</div>
+            <div style={{ color: COLORS.gray600 }}>Koenbergkstraße 3, 99084 Erfurt</div>
           </div>
-
-          <div
-            style={{
-              marginTop: "8px",
-              fontSize: "11px",
-              color: COLORS.gray600,
-            }}
-          >
-            E-Mail: ff-thueringen@blindeninstitut.de
+          <div>
+            <div style={{ fontWeight: 600, color: COLORS.gray900, marginBottom: "2px" }}>
+              Standort Schmalkalden
+            </div>
+            <div style={{ color: COLORS.gray600 }}>Tel: 03683 643-0</div>
+            <div style={{ color: COLORS.gray600 }}>Notstraße 11, 98574 Schmalkalden</div>
           </div>
         </div>
 
-        {/* Links */}
-        <div style={{ marginBottom: "24px" }}>
-          <h3
-            style={{
-              fontSize: "13px",
-              fontWeight: 600,
-              color: COLORS.gray900,
-              margin: "0 0 8px 0",
-            }}
-          >
-            Weiterführende Informationen
-          </h3>
-          <div
-            style={{
-              fontSize: "11px",
-              color: COLORS.gray600,
-              lineHeight: "1.8",
-            }}
-          >
-            <div>
-              <span style={{ color: COLORS.brand, fontWeight: 500 }}>
-                www.blindeninstitut.de
-              </span>
-              <span style={{ color: COLORS.gray400 }}> — Startseite</span>
-            </div>
-            <div>
-              <span style={{ color: COLORS.brand, fontWeight: 500 }}>
-                www.blindeninstitut.de/de/angebote/fruehfoerderung-sehen
-              </span>
-              <span style={{ color: COLORS.gray400 }}>
-                {" "}
-                — Frühförderung Sehen
-              </span>
-            </div>
-            <div>
-              <span style={{ color: COLORS.brand, fontWeight: 500 }}>
-                www.blindeninstitut.de/de/blindeninstitute/thueringen
-              </span>
-              <span style={{ color: COLORS.gray400 }}>
-                {" "}
-                — Blindeninstitut Thüringen
-              </span>
-            </div>
+        <div style={{ marginTop: "8px", fontSize: "11px", color: COLORS.gray600 }}>
+          E-Mail: ff-thueringen@blindeninstitut.de
+        </div>
+      </div>
+
+      {/* Links */}
+      <div data-pdf-block style={{ marginTop: "16px", marginBottom: "8px" }}>
+        <h3 style={{ fontSize: "13px", fontWeight: 600, color: COLORS.gray900, margin: "0 0 8px 0" }}>
+          Weiterführende Informationen
+        </h3>
+        <div style={{ fontSize: "11px", color: COLORS.gray600, lineHeight: "1.8" }}>
+          <div>
+            <span style={{ color: COLORS.brand, fontWeight: 500 }}>www.blindeninstitut.de</span>
+            <span style={{ color: COLORS.gray400 }}> — Startseite</span>
+          </div>
+          <div>
+            <span style={{ color: COLORS.brand, fontWeight: 500 }}>
+              www.blindeninstitut.de/de/angebote/fruehfoerderung-sehen
+            </span>
+            <span style={{ color: COLORS.gray400 }}> — Frühförderung Sehen</span>
+          </div>
+          <div>
+            <span style={{ color: COLORS.brand, fontWeight: 500 }}>
+              www.blindeninstitut.de/de/blindeninstitute/thueringen
+            </span>
+            <span style={{ color: COLORS.gray400 }}> — Blindeninstitut Thüringen</span>
           </div>
         </div>
+      </div>
 
-        {/* Footer */}
-        <div
-          style={{
-            height: "2px",
-            backgroundColor: COLORS.gray200,
-            borderRadius: "1px",
-            marginBottom: "12px",
-          }}
-        />
-        <div
-          style={{
-            textAlign: "center" as const,
-            fontSize: "10px",
-            color: COLORS.gray400,
-            paddingBottom: "24px",
-          }}
-        >
-          Erstellt mit Blindi | Blindeninstitutsstiftung |{" "}
-          {new Date().toLocaleDateString("de-DE")}
+      {/* Footer */}
+      <div data-pdf-block>
+        <div style={{ height: "2px", backgroundColor: COLORS.gray200, borderRadius: "1px", marginBottom: "12px" }} />
+        <div style={{ textAlign: "center" as const, fontSize: "10px", color: COLORS.gray400, paddingBottom: "24px" }}>
+          Erstellt mit Blindi | Blindeninstitutsstiftung | {new Date().toLocaleDateString("de-DE")}
         </div>
       </div>
     </div>
