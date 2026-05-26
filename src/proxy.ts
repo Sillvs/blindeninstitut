@@ -53,15 +53,11 @@ export function proxy(request: NextRequest) {
     }
   }
 
-  // 2. Auth (fails closed in production when API_TOKEN unset)
+  // 2. Auth. When API_TOKEN is set, enforce bearer. When unset, allow —
+  //    rate-limit is the cost gate. See src/lib/security/auth.ts for the
+  //    posture rationale.
   const auth = checkApiAuth(request);
   if (!auth.ok) {
-    if (auth.reason === "misconfigured") {
-      return NextResponse.json(
-        { error: "Server nicht für Produktivbetrieb konfiguriert" },
-        { status: 503 }
-      );
-    }
     return NextResponse.json(
       { error: "Nicht autorisiert" },
       { status: 401, headers: { "WWW-Authenticate": "Bearer" } }

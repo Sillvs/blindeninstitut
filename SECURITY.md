@@ -10,9 +10,18 @@ Browser  ──HTTPS──►  Next.js Middleware  ──►  /api/* Routen  ─
 ```
 
 Alle API-Routen liegen hinter:
-1. **Bearer-Token-Auth** (`API_TOKEN` env var) — wenn gesetzt, jede Anfrage ohne gültiges Token bekommt 401
+1. **Optionale Bearer-Token-Auth** (`API_TOKEN` env var) — opt-in. Wenn gesetzt, jede Anfrage ohne gültiges Token bekommt 401. Wenn ungesetzt: anonymer Demo-Modus (siehe „Auth-Posture" unten).
 2. **Per-IP Rate-Limit** (Token-Bucket, in-memory) — bremst Cost-Amplification-Angriffe auf OpenAI-Quota
 3. **Input-Validation** — Längenbegrenzungen, MIME-Check, PDF-Magic-Bytes, strikte Role-Whitelist für Chat-History
+
+## Auth-Posture — bewusste Wahl pro Deployment
+
+| Modus | Konfig | Wann |
+|---|---|---|
+| **Anonymer Demo-Modus** | `API_TOKEN` ungesetzt | Public PoC, Demo-URLs (z.B. die Vercel-Preview, die die Stiftung testen darf). Rate-Limit + max_tokens-Caps sind die einzigen Cost-Gates. Akzeptables Risiko-Niveau weil die App stateless ist und keine PII persistiert. |
+| **Bearer-Mode** | `API_TOKEN=<32+ char hex>` | Institutionelle Deployments hinter Reverse-Proxy / SSO. Der Proxy injiziert den Authorization-Header. Anfragen ohne Token → 401. |
+
+Frühere Versionen hatten einen `fail-closed`-Default in Production wenn kein `API_TOKEN` gesetzt war. Das hat die Demo-URL der Stiftung blockiert (sie haben das Tool ohne Passwort erwartet). Das fail-closed-Verhalten passte nur zum Bearer-Mode und wurde entfernt. Die übrigen Härtungen (Rate-Limit, max_tokens-Caps, Body-Size-Cap, Prompt-Injection-Nonce-Fences, CSP, PII-redacted Logs, PDF-Validation, CVE-Patches) bleiben in beiden Modi aktiv.
 
 ## Implementierte Härtungen
 
