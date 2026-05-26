@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented here. Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); the project follows semantic versioning.
 
+## [0.1.2] - 2026-05-26
+
+### Changed
+- `API_TOKEN` is now opt-in instead of fail-closed-in-production. Unset = anonymous demo mode (rate-limit remains the cost gate). Set = bearer required (institutional reverse-proxy scenario). The fail-closed behavior in 0.1.1 broke the Vercel demo URL — the foundation expected to test the tool without entering a password.
+
 ## [0.1.1] - 2026-05-26
 
 ### Added

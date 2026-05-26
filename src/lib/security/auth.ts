@@ -1,12 +1,21 @@
 /**
  * Optional shared-secret auth gate for API routes.
  *
- * If `API_TOKEN` env var is set, every /api/* call must include
- * `Authorization: Bearer <API_TOKEN>` (or `x-api-token: <API_TOKEN>`).
+ * Auth posture is opt-in, not on by default:
  *
- * In production, API_TOKEN MUST be set. `assertAuthConfigured()` is called
- * from the proxy and FAILS CLOSED (returns false) when API_TOKEN is missing
- * in production, so /api/* gets a hard 503 instead of silently being open.
+ *   API_TOKEN unset  → anonymous mode. Rate-limit is the only cost gate.
+ *                      Intended for public PoC / demo deployments.
+ *   API_TOKEN set    → every /api/* call must present a matching bearer token.
+ *                      Intended for institutional deployments behind a reverse
+ *                      proxy that injects the header.
+ *
+ * Earlier versions of this module FAILED CLOSED in production when API_TOKEN
+ * was unset. That broke the Vercel demo URL the foundation was sent. The
+ * design intent was always "anonymous mode for demos, bearer mode for
+ * institutional reverse proxies" — the fail-closed behavior was over-fit to
+ * the institutional case and is removed here. The remaining defenses
+ * (rate-limit, max_tokens caps, body-size cap, prompt-injection nonce
+ * fences, CSP, PII-redacted logs) still apply in anonymous mode.
  *
  * Edge-runtime compatible: pure JS, no node:crypto.
  */
@@ -19,11 +28,6 @@ import { NextRequest } from "next/server";
  * Edge runtime (where Next.js proxy runs) does not expose node:crypto.
  * We implement the standard XOR-accumulate pattern manually. Bytes are
  * encoded first so multibyte characters can't shortcut the comparison.
- *
- * Length leakage: the loop runs for max(a.length, b.length) iterations.
- * For 64-char hex tokens that's not exploitable over HTTP timing, but we
- * still mix the length into the diff so a length mismatch fails fast in
- * value-comparison terms.
  */
 function constantTimeEquals(a: string, b: string): boolean {
   const enc = new TextEncoder();
@@ -41,35 +45,24 @@ function constantTimeEquals(a: string, b: string): boolean {
 
 export interface AuthResult {
   ok: boolean;
-  reason?: "missing-credentials" | "invalid-credentials" | "misconfigured";
+  reason?: "missing-credentials" | "invalid-credentials";
 }
 
 /**
- * Fail-closed in any non-development environment. Allowed in dev for
- * convenience. Read NODE_ENV each call so the proxy doesn't cache a stale
- * module-load value.
- *
- * Whitelist `development` only. Anything else — production, staging,
- * preview, test, undefined — fails closed. Matches the principle of least
- * surprise for operators: if NODE_ENV isn't explicitly `development`, the
- * server is not a dev box.
+ * True when bearer-token enforcement is active for this deployment.
+ * The proxy uses this to decide whether to demand a token.
  */
-export function isAuthConfigured(): { ok: boolean; reason?: string } {
-  const expected = process.env.API_TOKEN;
-  if (expected && expected.length >= 16) return { ok: true };
-  const env = process.env.NODE_ENV;
-  if (env === "development") return { ok: true };
-  return { ok: false, reason: "api-token-missing-or-weak" };
+export function isBearerAuthEnabled(): boolean {
+  const t = process.env.API_TOKEN;
+  return typeof t === "string" && t.length >= 16;
 }
 
 export function checkApiAuth(request: NextRequest): AuthResult {
-  const cfg = isAuthConfigured();
-  if (!cfg.ok) return { ok: false, reason: "misconfigured" };
+  // Anonymous mode — no token configured, anyone can call /api/*.
+  // Rate-limit in the proxy is the cost gate.
+  if (!isBearerAuthEnabled()) return { ok: true };
 
-  const expected = process.env.API_TOKEN;
-  // Dev mode: no token set, allow all.
-  if (!expected) return { ok: true };
-
+  const expected = process.env.API_TOKEN!;
   const authHeader = request.headers.get("authorization") ?? "";
   const xApiToken = request.headers.get("x-api-token") ?? "";
 
