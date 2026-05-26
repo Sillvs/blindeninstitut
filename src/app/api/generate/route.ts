@@ -3,6 +3,12 @@ import { openai } from "@/lib/openai";
 import { ANALYSIS_SYSTEM_PROMPT } from "@/lib/prompts";
 import { classifyFindingSource } from "@/lib/knowledge-base";
 import { Finding } from "@/lib/types";
+import { validateGenerateBody } from "@/lib/security/validate";
+import { logError } from "@/lib/security/log";
+import { LIMITS } from "@/lib/security/limits";
+import { fence, renderFence, FENCE_PREAMBLE } from "@/lib/security/fence";
+
+export const runtime = "nodejs";
 
 function classifyFindings(
   findings: Omit<Finding, "source" | "hidden">[]
@@ -19,31 +25,26 @@ function classifyFindings(
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { pdfText, interviewAnswers } = body;
-
-    if (!pdfText || !pdfText.trim()) {
-      return NextResponse.json(
-        { error: "Kein Berichtstext vorhanden" },
-        { status: 400 }
-      );
+    const raw = await request.json();
+    const v = validateGenerateBody(raw);
+    if ("error" in v) {
+      return NextResponse.json({ error: v.error }, { status: v.status });
     }
+    const { pdfText, interviewAnswers } = v;
 
-    // Build user message with optional interview context
-    let userMessage = `Bitte analysiere den folgenden orthoptischen Bericht und erstelle einen Eltern-Infobogen:\n\n${pdfText}`;
+    const answers = Object.values(interviewAnswers)
+      .filter((a) => a.trim())
+      .join("\n");
 
-    if (interviewAnswers && Object.keys(interviewAnswers).length > 0) {
-      const answersText = Object.values(interviewAnswers)
-        .filter((a) => typeof a === "string" && (a as string).trim())
-        .map((a) => `- ${a}`)
-        .join("\n");
+    const blocks = [
+      fence("orthoptischer_bericht", pdfText),
+      fence("kontext_fruehfoerderin", answers),
+    ];
+    const userMessage =
+      "Bitte analysiere den folgenden orthoptischen Bericht und erstelle " +
+      "einen Eltern-Infobogen.\n\n" +
+      `${FENCE_PREAMBLE}\n\n${renderFence(blocks)}`;
 
-      if (answersText) {
-        userMessage += `\n\nZusätzliche Kontextinformationen der Frühförderin:\n${answersText}`;
-      }
-    }
-
-    // Call OpenAI with retry on JSON parse failure
     let report;
     let attempts = 0;
     const maxAttempts = 2;
@@ -59,6 +60,7 @@ export async function POST(request: NextRequest) {
         ],
         response_format: { type: "json_object" },
         temperature: 0.3,
+        max_tokens: LIMITS.MAX_OUTPUT_TOKENS_GENERATE,
       });
 
       const content = completion.choices[0].message.content;
@@ -101,7 +103,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Post-processing: deterministic source classification
     if (report.sensorik?.findings) {
       report.sensorik.findings = classifyFindings(report.sensorik.findings);
     }
@@ -113,10 +114,10 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json(report);
-  } catch (error: unknown) {
-    console.error("Generate error:", error);
+  } catch (err: unknown) {
+    logError("generate", err);
 
-    if (error instanceof Error && error.message.includes("timeout")) {
+    if (err instanceof Error && err.message.includes("timeout")) {
       return NextResponse.json(
         {
           error:
