@@ -1,0 +1,17 @@
+.git
+.gitignore
+.gstack
+.context
+node_modules
+.next
+.env
+.env.*
+!.env.example
+README.md
+SECURITY.md
+BSI.md
+Dockerfile
+.dockerignore
+*.log
+.DS_Store
+.vercel

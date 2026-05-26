@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { openai } from "@/lib/openai";
+import { openai, getModel } from "@/lib/openai";
 import { INTERVIEW_QUESTIONS_PROMPT } from "@/lib/prompts";
 import pdfParse from "pdf-parse";
 import { validatePdfFile } from "@/lib/security/validate";
@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
     let questions: { id: string; question: string; placeholder: string }[] = [];
     try {
       const completion = await openai.chat.completions.create({
-        model: "gpt-4o",
+        model: getModel(),
         messages: [
           { role: "system", content: INTERVIEW_QUESTIONS_PROMPT },
           { role: "user", content: safePdfText },

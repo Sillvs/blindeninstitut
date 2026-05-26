@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { openai } from "@/lib/openai";
+import { openai, getModel } from "@/lib/openai";
 import { ANALYSIS_SYSTEM_PROMPT } from "@/lib/prompts";
 import { classifyFindingSource } from "@/lib/knowledge-base";
 import { Finding } from "@/lib/types";
@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
       attempts++;
 
       const completion = await openai.chat.completions.create({
-        model: "gpt-4o",
+        model: getModel(),
         messages: [
           { role: "system", content: ANALYSIS_SYSTEM_PROMPT },
           { role: "user", content: userMessage },

@@ -57,6 +57,10 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  // Produces a minimal self-contained server build in `.next/standalone/`
+  // for on-prem Docker deployments. See Dockerfile.
+  output: "standalone",
+
   serverExternalPackages: ["pdf-parse"],
 
   async headers() {

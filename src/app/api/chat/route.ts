@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { openai } from "@/lib/openai";
+import { openai, getModel } from "@/lib/openai";
 import { CHAT_SYSTEM_PROMPT } from "@/lib/prompts";
 import { validateChatBody } from "@/lib/security/validate";
 import { logError } from "@/lib/security/log";
@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
     ];
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: getModel(),
       messages,
       response_format: { type: "json_object" },
       temperature: 0.4,

@@ -49,6 +49,20 @@ Alle API-Routen liegen hinter:
 - **Mehrbenutzer-Isolation**: Bei Setzen von `API_TOKEN` haben alle Benutzer dasselbe Token. Für Audit-Trail pro Benutzer → echte SSO einbauen (Auth.js mit dem Institutions-IdP).
 - **OpenAI-Side-Channel**: OpenAI sieht den vollständigen PDF-Text. Falls das unvereinbar mit Schweigepflicht ist, lokales LLM (z.B. Llama 3 70B) einsetzen — die App ist so gebaut, dass `src/lib/openai.ts` der einzige Berührungspunkt ist und auf jeden OpenAI-kompatiblen Endpoint umgestellt werden kann.
 
+## Deployment-Optionen für DSGVO-konformen Betrieb
+
+Der Code unterstützt drei Provider-Konfigurationen ohne Source-Änderung:
+
+| Option | LLM-Provider | Hosting | Konfiguration |
+|---|---|---|---|
+| A | OpenAI USA | Vercel EU | (Default — *nur Test/PoC, nicht für Echtdaten*) |
+| B | Azure OpenAI EU (Microsoft AVV) | On-Prem Docker | `OPENAI_BASE_URL=https://<resource>.openai.azure.com/openai/deployments/<deployment>`, Azure-Key in `OPENAI_API_KEY` |
+| C | Lokales LLM (Ollama / vLLM, kein Drittlandtransfer) | On-Prem Docker | `OPENAI_BASE_URL=http://ollama.intern:11434/v1`, `LLM_MODEL=llama3.1:70b`, `OPENAI_API_KEY=local` |
+
+On-Prem-Deployment: siehe `Dockerfile` im Repo. Build: `docker build -t eltern-infobogen .`, Run: siehe Header-Kommentar in Dockerfile.
+
+Detaillierte BSI-Grundschutz- und DSGVO-Artikel-Zuordnung: siehe **`BSI.md`** (Vorlage für die externe Sicherheitsfirma der Stiftung).
+
 ## Bekannte Restrisiken
 
 - **`pdf-parse@1.1.1`** wird nicht mehr aktiv gewartet (letzter Release 2018). Mitigationen: Magic-Byte-Check vorgelagert, Size-Cap 10 MB, läuft im sandbox'd Next.js-Runtime, kein JS-Eval auf PDFs. Migration auf `unpdf` oder `pdf2json` ist auf der Roadmap.
@@ -59,3 +73,4 @@ Alle API-Routen liegen hinter:
 - **2026-05-26 — Runde 1**: Initialer Security-Audit. Findings: keine Auth, kein Rate-Limit, Prompt-Injection (chatHistory + Anmerkungen), Next.js 16.2.1 mit 13 CVEs (SSRF CVSS 8.6), keine Input-Validierung, keine Security-Headers. **Fixes:** Bearer-Auth + Rate-Limit + Body-Validation + Next.js 16.2.6 + CSP/HSTS/X-Frame + noindex + `npm audit` clean.
 - **2026-05-26 — Runde 2** (unabhängiger Re-Audit): 9 weitere Findings. **Fixes:** Body-Size-Cap im Edge-Proxy (411/413), pdf-parse Timeout, max_tokens auf jedem OpenAI-Call, OpenAI SDK Timeout 30 s, Nonce-Fences gegen Prompt-Injection-Tag-Breakout, Auth fail-closed in allen Nicht-Dev-Envs, `unsafe-eval` aus CSP entfernt, `logError` mit PII-Filter, TRUSTED_CLIENT_IP_HEADER für robuste Rate-Limit-Buckets.
 - **2026-05-26 — Runde 3** (unabhängiger Re-Audit): **0 Findings ≥ 7/10 Confidence.** Ship-ready.
+- **2026-05-26 — Runde 4** (Compliance-Pass nach IT-Feedback der Stiftung): LLM-Provider-Abstraktion (`OPENAI_BASE_URL` + `LLM_MODEL` → Azure OpenAI EU / lokales LLM möglich), Multi-Stage Dockerfile für On-Prem-Betrieb, `BSI.md` mit Grundschutz-Modul-Mapping als Vorlage für externe Sicherheitsfirma. Pseudonymisierung wartet bewusst auf Rückmeldung der Security-Firma (Stiftung entscheidet Reverse-Map vs. volle Anonymisierung).
